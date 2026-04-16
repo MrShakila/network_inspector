@@ -142,9 +142,18 @@ class HttpInterceptor extends BaseClient {
       }
     }
     if (logIsAllowed) saveRequest(request);
-    final response = await Response.fromStream(
-      await send(request),
-    );
+
+    final Response response;
+    try {
+      response = await Response.fromStream(
+        await send(request),
+      );
+    } catch (e) {
+      if (logIsAllowed) {
+        developer.log('\n[Error Message]: ${e.toString()}');
+      }
+      rethrow;
+    }
 
     /// Intercept area
     if (logIsAllowed) {
@@ -191,32 +200,30 @@ class HttpInterceptor extends BaseClient {
 
   Future<void> saveRequest(Request request) async {
     var payload = HttpRequest(
-      baseUrl: request.url.origin,
-      path: request.url.path,
-      params: _jsonUtil.encodeRawJson(request.url.queryParameters),
-      method: request.method,
-      requestHeader: _jsonUtil.encodeRawJson(request.headers),
-      requestBody: _jsonUtil.encodeRawJson(request.body),
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      requestSize: _byteUtil.stringToBytes(request.body.toString()),
-      requestHashCode: request.hashCode,
-      cUrl: null
-    );
-    await networkInspector!.writeHttpRequestLog(payload);
+        baseUrl: request.url.origin,
+        path: request.url.path,
+        params: _jsonUtil.encodeRawJson(request.url.queryParameters),
+        method: request.method,
+        requestHeader: _jsonUtil.encodeRawJson(request.headers),
+        requestBody: _jsonUtil.encodeRawJson(request.body),
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        requestSize: _byteUtil.stringToBytes(request.body.toString()),
+        requestHashCode: request.hashCode,
+        cUrl: null);
+    await networkInspector?.writeHttpRequestLog(payload);
   }
 
   Future<void> saveResponse(Response response, int requestHashCode) async {
     var payload = HttpResponse(
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      responseHeader: _jsonUtil.encodeRawJson(response.headers).toString(),
-      responseBody: _jsonUtil.encodeRawJson(response.body).toString(),
-      responseStatusCode: response.statusCode,
-      responseStatusMessage: response.reasonPhrase.toString(),
-      responseSize: _byteUtil.stringToBytes(response.body.toString()),
-      requestHashCode: requestHashCode,
-        cUrl: null
-    );
-    await networkInspector!.writeHttpResponseLog(payload);
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        responseHeader: _jsonUtil.encodeRawJson(response.headers).toString(),
+        responseBody: _jsonUtil.encodeRawJson(response.body).toString(),
+        responseStatusCode: response.statusCode,
+        responseStatusMessage: response.reasonPhrase.toString(),
+        responseSize: _byteUtil.stringToBytes(response.body.toString()),
+        requestHashCode: requestHashCode,
+        cUrl: null);
+    await networkInspector?.writeHttpResponseLog(payload);
   }
 
   Future<void> finishActivity(
@@ -225,7 +232,7 @@ class HttpInterceptor extends BaseClient {
     String title,
     String message,
   ) async {
-    if (onHttpFinish is Function) {
+    if (onHttpFinish != null) {
       await onHttpFinish!(request.hashCode, title, message);
     }
     await logRequest(request);

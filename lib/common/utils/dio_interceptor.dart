@@ -69,12 +69,15 @@ class DioInterceptor extends Interceptor {
       if (isConsoleLogAllowed) {
         developer.log(logError);
       }
-      await saveResponse(err.response!);
-      await finishActivity(
-        err.response!,
-        err.response!.requestOptions.uri.toString(),
-        err.response!.data.toString(),
-      );
+      final response = err.response;
+      if (response != null) {
+        await saveResponse(response);
+        await finishActivity(
+          response,
+          response.requestOptions.uri.toString(),
+          response.data.toString(),
+        );
+      }
     }
 
     var errorResponse = '\n[Error Response]'
@@ -121,7 +124,7 @@ class DioInterceptor extends Interceptor {
         requestSize: _byteUtil.stringToBytes(options.data.toString()),
         requestHashCode: options.hashCode,
         cUrl: options.toCurlCmd());
-    await networkInspector!.writeHttpRequestLog(payload);
+    await networkInspector?.writeHttpRequestLog(payload);
   }
 
   Future<void> saveResponse(Response response) async {
@@ -135,7 +138,7 @@ class DioInterceptor extends Interceptor {
         responseSize: _byteUtil.stringToBytes(response.data.toString()),
         requestHashCode: request.hashCode,
         cUrl: request.toCurlCmd());
-    await networkInspector!.writeHttpResponseLog(payload);
+    await networkInspector?.writeHttpResponseLog(payload);
   }
 
   Future<void> finishActivity(
@@ -144,8 +147,8 @@ class DioInterceptor extends Interceptor {
     String message,
   ) async {
     var request = response.requestOptions;
-    if (onHttpFinish is Function) {
-      await onHttpFinish!(response.requestOptions.hashCode, title, message);
+    if (onHttpFinish != null) {
+      await onHttpFinish!(request.hashCode, title, message);
     }
     if (isConsoleLogAllowed) {
       await logRequest(request);
