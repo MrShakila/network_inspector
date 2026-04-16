@@ -90,18 +90,29 @@ class NetworkInspector {
 
   Future<void> injectDependencies() async {
     database = await DatabaseHelper.connect();
-    logDatasource = LogDatasourceImpl(
-      database: database!,
-    );
-    logRepository = LogRepositoryImpl(
-      logDatasource: logDatasource!,
-    );
-    logHttpRequest = LogHttpRequest(
-      logRepository: logRepository!,
-    );
-    logHttpResponse = LogHttpResponse(
-      logRepository: logRepository!,
-    );
+    final db = database;
+    if (db != null) {
+      logDatasource = LogDatasourceImpl(
+        database: db,
+      );
+    }
+
+    final datasource = logDatasource;
+    if (datasource != null) {
+      logRepository = LogRepositoryImpl(
+        logDatasource: datasource,
+      );
+    }
+
+    final repository = logRepository;
+    if (repository != null) {
+      logHttpRequest = LogHttpRequest(
+        logRepository: repository,
+      );
+      logHttpResponse = LogHttpResponse(
+        logRepository: repository,
+      );
+    }
   }
 
   /// writeHttpRequestLog is used to log http request data,

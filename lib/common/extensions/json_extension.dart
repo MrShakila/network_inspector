@@ -2,13 +2,14 @@ import 'dart:convert';
 
 extension JsonExtension on String? {
   String get prettify {
-    if (this != null) {
+    final value = this;
+    if (value != null) {
       try {
-        var decoded = json.decode(this!);
+        var decoded = json.decode(value);
         var encoder = const JsonEncoder.withIndent('   ');
         return encoder.convert(decoded);
       } catch (e) {
-        return this ?? 'N/A-Cannot Parse';
+        return value;
       }
     }
     return 'N/A';

@@ -2,9 +2,10 @@ import 'package:intl/intl.dart';
 
 extension UnixExtension on int? {
   String? get convertToYmdHms {
-    if (this != null) {
+    final value = this;
+    if (value != null) {
       var dateFormat = DateFormat('y-MM-DD hh:mm:ss');
-      var dateTime = DateTime.fromMillisecondsSinceEpoch(this!);
+      var dateTime = DateTime.fromMillisecondsSinceEpoch(value);
       return dateFormat.format(dateTime);
     }
     return null;

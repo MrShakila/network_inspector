@@ -9,8 +9,9 @@ class JsonUtil {
   final _dateTimeUtil = DateTimeUtil();
 
   static Map<String, dynamic>? tryDecodeRawJson(String? rawJson) {
+    if (rawJson == null) return null;
     try {
-      final decoded = json.decode(rawJson!);
+      final decoded = json.decode(rawJson);
       return decoded;
     } catch (e) {
       return null;
@@ -33,7 +34,7 @@ class JsonUtil {
     if (globalHeaders != null) {
       if (headers != null) {
         for (var key in headers.keys) {
-          globalHeaders[key] = headers[key]!;
+          globalHeaders[key] = headers[key] ?? '';
         }
         return globalHeaders;
       } else {
